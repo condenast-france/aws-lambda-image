@@ -15,8 +15,9 @@ class ImageProcessor {
      * @constructor
      * @param Object s3Object
      */
-    constructor(s3Object) {
-        this.s3Object = s3Object;
+    constructor(ImageObject,mode) {
+        this.mode = mode || null;
+        this.ImageObject = ImageObject;
     }
 
     /**
@@ -24,15 +25,20 @@ class ImageProcessor {
      *
      * @public
      * @param Config config
+     * @param Method method
      */
     run(config) {
+        if( this.mode == "upload" ) {
+            const Image = new ImageData(this.ImageObject.name, this.ImageObject.name, new Buffer(this.ImageObject.data, 'base64'), null,null)
+            return this.processImage(Image, config);
+        }
         if ( ! config.get("bucket") ) {
-            config.set("bucket", this.s3Object.bucket.name);
+            config.set("bucket", this.ImageObject.bucket.name);
         }
 
         return S3.getObject(
-            this.s3Object.bucket.name,
-            decodeURIComponent(this.s3Object.object.key.replace(/\+/g, ' '))
+            this.ImageObject.bucket.name,
+            decodeURIComponent(this.ImageObject.object.key.replace(/\+/g, ' '))
         )
         .then((imageData) => this.processImage(imageData, config));
     }
@@ -63,6 +69,8 @@ class ImageProcessor {
         if ( config.exists("reduce") ) {
             const reduce = config.get("reduce");
 
+
+
             if ( ! reduce.bucket ) {
                 reduce.bucket = config.get("bucket");
             }
@@ -72,15 +80,21 @@ class ImageProcessor {
             }
 
             reduce.jpegOptimizer = reduce.jpegOptimizer || jpegOptimizer;
-            promise = promise.then(() => this.execReduceImage(reduce, imageData).then(S3.putObject));
+
+            if ( this.mode === "upload") {
+                return this.execReduceImage(reduce, imageData);
+            } else {
+                promise = promise.then(() => this.execReduceImage(reduce, imageData).then(S3.putObject));
+            }
             processedImages++;
         }
 
-        config.get("resizes", []).filter((option) => {
-            return option.size &&
+        if( this.mode !== "upload") {
+            config.get("resizes", []).filter((option) => {
+                return option.size &&
                 imageData.fileName.indexOf(option.directory) !== 0 // don't process images in the output folder
-        }).forEach((option) => {
-            if ( ! option.bucket ) {
+            }).forEach((option) => {
+                if ( ! option.bucket ) {
                 option.bucket = config.get("bucket");
             }
             if ( ! option.acl ){
@@ -90,7 +104,7 @@ class ImageProcessor {
             promise = promise.then(() => this.execResizeImage(option, imageData).then(S3.putObject));
             processedImages++;
         });
-
+        }
         return promise.then(() => new Promise((resolve) => resolve(processedImages)));
     }
 
@@ -122,8 +136,7 @@ class ImageProcessor {
      * @return Promise
      */
     execReduceImage(option, imageData) {
-        const reducer = new ImageReducer(option);
-
+        const reducer = new ImageReducer(option,this.mode);
         return reducer.exec(imageData);
     }
 

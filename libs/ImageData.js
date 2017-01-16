@@ -14,6 +14,7 @@ class ImageData {
      * @param Object acl
      */
     constructor(key, name, data, headers, acl) {
+
         this._fileName   = key;
         this._bucketName = name;
         this._data       = ( Buffer.isBuffer(data) ) ? data : new Buffer(data, "binary");

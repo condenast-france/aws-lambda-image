@@ -59,10 +59,9 @@ class StreamChain {
 
             this.inputStream.on("error", reject);
             current = this.inputStream;
-
             this.pipeProcesses.forEach((optimizer) => {
                 const proc = optimizer.spawnProcess();
-                current.pipe(proc.stdin);
+                this.inputStream.pipe(proc.stdin);
                 current = proc.stdout;
             });
 

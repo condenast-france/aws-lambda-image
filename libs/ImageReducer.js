@@ -18,8 +18,9 @@ class ImageReducer {
      * @constructor
      * @param Object option
      */
-    constructor(option) {
+    constructor(option,mode) {
         this.option = option || {};
+        this.mode = mode || null;
     }
 
     /**
@@ -31,11 +32,16 @@ class ImageReducer {
      */
     exec(image) {
         const option = this.option;
-
+        let type;
         const input   = new ReadableStream(image.data);
-        const streams = this.createReduceProcessList(image.type.toLowerCase());
-        const chain   = new StreamChain(input);
+        if( this.mode === "upload") {
+            type = image.type.split('/').pop();
+        } else {
+            type = image.type;
+        }
+        const streams = this.createReduceProcessList(type.toLowerCase());
 
+        const chain   = new StreamChain(input);
         return chain.pipes(streams).run()
         .then((buffer) => {
             return new ImageData(
