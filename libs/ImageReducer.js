@@ -1,12 +1,18 @@
 "use strict";
 
-const ImageData      = require("./ImageData");
-const Mozjpeg        = require("./optimizers/Mozjpeg");
-const Pngquant       = require("./optimizers/Pngquant");
-const Pngout         = require("./optimizers/Pngout");
-const Gifsicle       = require("./optimizers/Gifsicle");
-const ReadableStream = require("./ReadableImageStream");
-const StreamChain    = require("./StreamChain");
+const ImageData         = require("./ImageData");
+const Mozjpeg           = require("./optimizers/Mozjpeg");
+const Pngquant          = require("./optimizers/Pngquant");
+const Pngout            = require("./optimizers/Pngout");
+const Gifsicle          = require("./optimizers/Gifsicle");
+const ReadableStream    = require("./ReadableImageStream");
+const StreamChain       = require("./StreamChain");
+const imageMin          = require('imagemin');
+const imageMinMozjpeg   = require('imagemin-mozjpeg');
+const imageMinPngquant  = require('imagemin-pngquant');
+const imageMinPngout    = require('imagemin-pngout');
+const imageMinGifsicle  = require('imagemin-gifsicle');
+const imageminJpegtran  = require('imagemin-jpegtran');
 // const JpegOptim    = require("./optimizers/JpegOptim");
 
 class ImageReducer {
@@ -39,19 +45,34 @@ class ImageReducer {
         } else {
             type = image.type;
         }
-        const streams = this.createReduceProcessList(type.toLowerCase());
-
-        const chain   = new StreamChain(input);
-        return chain.pipes(streams).run()
-        .then((buffer) => {
-            return new ImageData(
-                image.combineWithDirectory(option.directory, option.prefix),
-                option.bucket || image.bucketName,
-                buffer,
-                image.headers,
-                option.acl
-            );
-        });
+        //const streams = this.createReduceProcessList(type.toLowerCase());
+        const optimizers = [];
+        switch ( type ) {
+            case "png":
+                optimizers.push(imageMinPngquant({quality: this.option.quality}));
+                optimizers.push(imageMinPngout({strategy: 1}));
+                break;
+            case "jpg":
+            case "jpeg":
+                //optimizers.push(imageMinMozjpeg(this.option.quality));
+                optimizers.push(imageminJpegtran());
+                break;
+            case "gif":
+                optimizers.push(imageMinGifsicle());
+                break;
+            default:
+                throw new Error("Unexcepted file type.");
+        }
+        return imageMin.buffer(image.data, { use: optimizers })
+            .then((buffer) => {
+                return new ImageData(
+                    image.combineWithDirectory(option.directory, option.prefix),
+                    option.bucket || image.bucketName,
+                    buffer,
+                    image.headers,
+                    option.acl
+                );
+            });
     }
 
     /**
@@ -75,6 +96,9 @@ class ImageReducer {
             case "jpg":
             case "jpeg":
                 streams.push(new Mozjpeg(this.option.quality));
+                imagemin(['images/*.jpg'], 'build/images', {use: [imageminMozjpeg()]}).then(() => {
+                    console.log('Images optimized');
+                });
                 // switch JPEG optimizer
                 // if ( this.option.jpegOptimizer === "jpegoptim" ) { // using jpegoptim
                 //     streams.push(new JpegOptim());
