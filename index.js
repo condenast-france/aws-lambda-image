@@ -44,7 +44,7 @@ exports.handler = (event, context, callback) => {
             context.succeed("Image already processed");
         } else {
             if(mode === "upload") {
-                var response = {
+                let response = {
                     status: 400,
                     errors: [
                         {
@@ -52,7 +52,7 @@ exports.handler = (event, context, callback) => {
                             message: "Error processing " + ImageObject.object.key + ": " + messages,
                         }
                     ]
-                }
+                };
                 context.fail(JSON.stringify(response));
             } else {
                 context.fail("Error processing " + ImageObject.object.key + ": " + messages);
