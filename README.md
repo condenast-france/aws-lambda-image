@@ -1,5 +1,6 @@
-## aws-lambda-image
+## aws-lambda-image-compress
 
+Based on https://github.com/ysugimoto/aws-lambda-image wih these status : 
 [![Build Status](https://travis-ci.org/ysugimoto/aws-lambda-image.svg?branch=master)](https://travis-ci.org/ysugimoto/aws-lambda-image)
 [![Code Climate](https://codeclimate.com/github/ysugimoto/aws-lambda-image/badges/gpa.svg)](https://codeclimate.com/github/ysugimoto/aws-lambda-image)
 [![npm version](https://badge.fury.io/js/aws-lambda-image.svg)](https://badge.fury.io/js/aws-lambda-image)
@@ -12,16 +13,28 @@ An AWS Lambda Function to resize/reduce images automatically. When an image is p
 
 - `node.js` ( AWS Lambda working version is **4.3.2** )
 - `make`
+- `ansible`
+- `vagrant`
 
 ### Installation
 
 Clone this repository and install dependencies:
 
 ```bash
-$ git clone git@github.com:ysugimoto/aws-lambda-image.git
-$ cd aws-lambda-image
+$ git clone git@github.com:condenast-france/aws-lambda-image-compress.git
+$ cd aws-lambda-image-compress
+$ vagrant up
+$ vagrant ssh
+$ cd /var/aws-lambda-image/current
 $ npm install .
 ```
+
+### Test image reduce with upload
+
+```bash
+$ lambda-local -t 120 -l index.js -h handler -e event-samples/image.js
+```
+
 
 ### Packaging
 
