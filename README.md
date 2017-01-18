@@ -7,7 +7,12 @@ Based on https://github.com/ysugimoto/aws-lambda-image wih these status :
 [![Join the chat at https://gitter.im/aws-lambda-image](https://img.shields.io/badge/GITTER-join%20chat-green.svg)](https://gitter.im/aws-lambda-image?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
-An AWS Lambda Function to resize/reduce images automatically. When an image is put on AWS S3 bucket, this package will resize/reduce it and put to S3.
+
+An AWS Lambda Function to resize/reduce images automatically. 
+There are 2 ways to use this lambda function
+
+- **S3 trigger** : When an image is put on AWS S3 bucket, this package will resize/reduce it and put to S3.
+- **API GATEWAY** : You can access to this throught an API GATEWAY Method
 
 ### Requirements
 
@@ -35,6 +40,11 @@ $ npm install .
 $ lambda-local -t 120 -l index.js -h handler -e event-samples/image.js
 ```
 
+### API Method to access to the correct exec
+
+```
+curl -X POST -H "Content-Type: image/jpeg" -H "x-api-key: ##YOUR_API_KEY##" -H "Cache-Control: no-cache" -H "Postman-Token: ed9f8d36-344f-3f00-19c9-080f2ae0a344" "https://rt8e1avrh4.execute-api.eu-west-1.amazonaws.com/Prod/compress"
+```
 
 ### Packaging
 
