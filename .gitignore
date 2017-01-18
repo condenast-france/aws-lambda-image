@@ -5,3 +5,5 @@ config.json
 npm-debug.log
 *.sw?
 .idea
+.idea/
+.vagrant
