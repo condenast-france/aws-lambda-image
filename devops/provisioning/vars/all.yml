@@ -1,0 +1,9 @@
+---
+server:
+    install: '1'
+    packages: [git]
+    timezone: Europe/Paris
+    locale: fr_FR.UTF-8
+mongodb_shell:
+    95ans:
+      - rs.initiate()

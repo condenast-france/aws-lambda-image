@@ -10,9 +10,9 @@ const StreamChain       = require("./StreamChain");
 const imageMin          = require('imagemin');
 const imageMinMozjpeg   = require('imagemin-mozjpeg');
 const imageMinPngquant  = require('imagemin-pngquant');
-const imageMinPngout    = require('imagemin-pngout');
+//const imageMinPngout    = require('imagemin-pngout');
 const imageMinGifsicle  = require('imagemin-gifsicle');
-const imageminJpegtran  = require('imagemin-jpegtran');
+//const imageminJpegtran  = require('imagemin-jpegtran');
 // const JpegOptim    = require("./optimizers/JpegOptim");
 
 class ImageReducer {
@@ -45,20 +45,19 @@ class ImageReducer {
         } else {
             type = image.type;
         }
-        //const streams = this.createReduceProcessList(type.toLowerCase());
         const optimizers = [];
         switch ( type ) {
             case "png":
                 optimizers.push(imageMinPngquant({quality: this.option.quality}));
-                optimizers.push(imageMinPngout({strategy: 1}));
+                //optimizers.push(imageMinPngout({strategy: 1}));
                 break;
             case "jpg":
             case "jpeg":
-                //optimizers.push(imageMinMozjpeg(this.option.quality));
-                optimizers.push(imageminJpegtran());
+                optimizers.push(imageMinMozjpeg(this.option.quality));
+                //optimizers.push(imageminJpegtran());
                 break;
             case "gif":
-                optimizers.push(imageMinGifsicle());
+                optimizers.push(imageMinGifsicle({optimizationLevel: 3}));
                 break;
             default:
                 throw new Error("Unexcepted file type.");
@@ -73,46 +72,6 @@ class ImageReducer {
                     option.acl
                 );
             });
-    }
-
-    /**
-     * Create reduce image process list
-     *
-     * @protected
-     * @param String type
-     * @return Array<Optimizer>
-     * @thorws Error
-     */
-    createReduceProcessList(type) {
-        console.log("Reducing to: " + (this.option.directory || "in-place"));
-
-        const streams = [];
-
-        switch ( type ) {
-            case "png":
-                streams.push(new Pngquant());
-                //streams.push(new Pngout());
-                break;
-            case "jpg":
-            case "jpeg":
-                streams.push(new Mozjpeg(this.option.quality));
-                imagemin(['images/*.jpg'], 'build/images', {use: [imageminMozjpeg()]}).then(() => {
-                    console.log('Images optimized');
-                });
-                // switch JPEG optimizer
-                // if ( this.option.jpegOptimizer === "jpegoptim" ) { // using jpegoptim
-                //     streams.push(new JpegOptim());
-                // } else {                                           // using mozjpeg
-                // }
-                break;
-            case "gif":
-                streams.push(new Gifsicle());
-                break;
-            default:
-                throw new Error("Unexcepted file type.");
-        }
-
-        return streams;
     }
 }
 

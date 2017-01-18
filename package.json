@@ -18,9 +18,7 @@
     "gm": "^1.23.0",
     "imagemin": "^5.2.2",
     "imagemin-gifsicle": "^5.1.0",
-    "imagemin-jpegtran": "^5.0.2",
     "imagemin-mozjpeg": "^6.0.0",
-    "imagemin-pngout": "^2.0.0",
     "imagemin-pngquant": "^5.0.0",
     "lodash": "4.12.0"
   },
